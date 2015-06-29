@@ -1,0 +1,36 @@
+src.SparseMatrix.SparseMatrix.java
+	SparseMatrix(String filepath)
+		读取coAuthor矩阵文件filepath，构造稀疏矩阵
+	SparseMatrix(boolean zeroOneSign)
+		构造初始为0*0的矩阵，zeroOneSign指明是否为0-1矩阵（若是，则后面程序将不读取元素值，而默认其为1，没有读取到的元素默认为0）	
+src.GetMatrix.GetMatrixByDBLP.java:
+	GetMatrixByDBLP(String dataFilepath,String matrixFilepath,String authorsFilepath,int minDegree)	
+		读取xml文件dataFilepath，输出coAuthor矩阵文件matrixFilepath,输出作者姓名文件authorsFilepath,参数最小度数minDegree
+		读取DBLP格式的xml文件，输出author的合作矩阵和author的姓名，合作矩阵中的id即authorsFilepath中对应作者名字的行数减一
+src.GetMatrix.GetMatrixByNeo4j.java：
+	GetMatrixByNeo4j(String neo4jFilepath,String matrixFilepath,String authorsFilepath)	
+		读取Neo4j数据库的存储文件neo4jFilepathString，输出coAuthor矩阵文件matrixFilepath,输出作者姓名文件authorsFilepath,参数最小度数minDegree
+		读取Neo4j数据库，遍历所有的Article，生成合作矩阵后输出合作矩阵和author的姓名，合作矩阵中的id即authorsFilepath中对应作者名字的行数减一
+src.Cluster.ClusterRN.java: 
+	ClusterRN(String matrixFilepath, String resultFilepath, float gamma, int maxTime)
+		读取文件matrixFilepath，聚类结果输出文件resultFilepath，参数gamma，最大迭代次数maxTime
+	ClusterRN(String matrixFilepath, String resultFilepath, float gamma, int maxTime, boolean continueSign)
+		如果continueSign为真且resultFilepath存在，则在resultFilepath的结果上继续聚类，其余同上
+	使用RN算法聚类，算法细节请参考Local resolution-limit-free Potts model for community detection(http://arxiv.org/abs/0803.2548v4)
+	resultFilepath文件输出格式：第一行为下面的行数，第二行开始按author id 大小排序，每个 author id 一行，输出为该 author id 对应的聚类 id
+	聚类结果输出在log文件中，第一行为聚类数目，接下来每个聚类占两行，第一行是聚类的大小，第二行是聚类的聚集系数
+src.DataToNeo4j.PutClusterToNeo4j.java
+	PutClusterToNeo4j(String neo4jFilepath, String filepath, String authorsFilepath, String clusterFilepath)
+		读取Neo4j数据库的存储文件neo4jFilepathString，合作矩阵文件filepath，作者名字文件authorsFilepath，聚类结果文件clusterFilepath
+		将聚类结果输出至neo4jFilepathString中
+		每次运行时会将已经存在的聚类节点删除，以免多次运行时会重复添加
+src.DataToNeo4j.PutCooperate.java
+	PutCooperate(String neo4jFilepath, String matrixFilepath,String authorsFilepath)
+		读取Neo4j数据库的存储文件neo4jFilepathString，合作矩阵文件filepath，作者名字文件authorsFilepath
+		根据合作矩阵，在neo4j中为author和其co-author添加Cooperate边
+		每次运行时会将已经存在的Cooperate边删除，以免多次运行时会重复添加
+src.DataToNeo4j.GenerateEdge.java
+	GenerateEdge(String subMatrixFilepath, String matrixFilepath, String subLabelFilepath, String labelFilepath)
+		读取子矩阵文件subMatrixFilepath和全矩阵文件matrixFilepath，子矩阵文件id对应的label和全矩阵id对应的label
+		根据label间的对应关系和全矩阵，给子矩阵添加全矩阵中有而子矩阵对应<author,co-author>没有的边
+		这个类用于为neo4j中添加边，因为原来爬虫得到的边数过少，以致聚类树木过多，所以结合了DBLP中的合作关系，在Neo4j添加对应的合作关系
