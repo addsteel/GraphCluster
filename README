@@ -1,2 +1,1 @@
-Read the dblp database and get the co-author information, by which the Cluster/ClusterRN clustering authors.
-My algorithm of cluster come from the paper in 'http://arxiv.org/abs/0803.2548v4'
+Clutering on authors by DBLP database. The cluster algorithm refer to paper of Peter Ronhovde, Zohar Nussinov, arxiv.org/abs/0803.2548v4
